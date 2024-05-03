@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')))
 
 // 身份验证中间件
-app.use(auth);
+// app.use(auth);
 
 // 关于验证码的中间件
 app.use(session({

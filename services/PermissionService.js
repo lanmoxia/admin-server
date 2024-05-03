@@ -10,12 +10,12 @@ const PermissionService = {
     }
   },
   getPermissions: async (req,res) => {
-    try {
-      return await PermissionModel.find().populate('children').populate('buttonList');
-    } catch (error) {
-      console.error('获取权限列表失败:', error);
-      throw new Error('数据库查询错误');
-    }
+    // try {
+    //   return await PermissionModel.find().populate('children').populate('buttonList');
+    // } catch (error) {
+    //   console.error('获取权限列表失败:', error);
+    //   throw new Error('数据库查询错误');
+    // }
   },
   updatePermission: async (permissionId, updateData) => {
     try {

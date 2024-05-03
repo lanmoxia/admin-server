@@ -1,34 +1,36 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// 按钮模型
-const ButtonSchema = new Schema({
-  name: { type: String, required: true },
-  parent_id: { type: Schema.Types.ObjectId, ref: 'Permission' },
-  type: { type: Number, required: true },
-  url: { type: String, required: true }
+// 定义认证信息模式
+const AuthSchema = new Schema({
+  role: {
+    type: String,
+    required: true
+  },
+  permissions: [String]
 }, { _id: false });
 
-// 权限模型
+// 定义元数据模式
+const MetaSchema = new Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  icon: String,
+  roles: [String],
+  auths: [AuthSchema],
+  hidden: Boolean
+}, { _id: false });
+
+// 定义权限模型的递归模式
 const PermissionSchema = new Schema({
-  name: { type: String, required: true },
-  parent_id: { type: Schema.Types.ObjectId, ref: 'Permission', default: null }, // 现在是可选的
-  type: { type: Number, required: true },
-  url: { type: String, required: true },
-  icon: { type: String, required: true },
-  children: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Permission'
-    }
-  ],
-  buttonList: { type: [ButtonSchema], default: undefined },
-  hidden: { type: Boolean, default: false }
-}, { timestamps: true });
+  path: {
+    type: String,
+    required: true
+  },
+  name: String,
+  meta: MetaSchema,
+  children: [this] // 递归结构
+},{ timestamps: true })
 
-// 递归子文档结构
-PermissionSchema.add({ children: [PermissionSchema] });
-
-const PermissionModel = mongoose.model('Permission', PermissionSchema);
-
-module.exports = PermissionModel
+module.exports = Permission = mongoose.model('Permission', PermissionSchema);

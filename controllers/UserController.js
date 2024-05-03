@@ -28,6 +28,7 @@ const UserController = {
 
     // 处理用户注册
     const result = await UserService.register(req.body)
+    console.log(result)
     if (result.error) {
       if (result.error === 'UserAlreadyExists') {
         return res.send(formatResponse(20001, '用户已存在'));

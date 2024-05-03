@@ -19,5 +19,5 @@ UserRouter.get('/publickey', UserController.getPublicKey)
 // 获取短信验证码
 UserRouter.post('/verify_code', SmsCodeController.getCode)
 // 手机登录
-UserRouter.post('/user/mobile_login', SmsLoginController.login);
+UserRouter.post('/user/mobile_login', SmsLoginController.login)
 module.exports = UserRouter

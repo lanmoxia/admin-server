@@ -28,12 +28,14 @@ const PermissionController = {
 
       // 假设SmsLoginModel中也有role字段
       const permissionData = user.role === 'admin' ? adminData : userData;
+      console.log(permissionData)
       res.status(200).send(formatResponse(200, '获取成功', permissionData));
     } catch (error) {
       if (error.name === 'JsonWebTokenError') {
         // 这里处理JWT验证失败的错误
         return res.status(401).send(formatResponse(401, "无效的token"));
       } else {
+        console.log('xxx',error)
         // 其他错误，可能是服务器错误
         return res.status(500).send(formatResponse(500, "服务器错误"));
       }
