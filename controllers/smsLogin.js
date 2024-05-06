@@ -1,5 +1,5 @@
 const SmsLoginService = require('../services/SmsLoginService');
-const SmsLoginModel = require('../model/SmsLoginModel'); 
+const {SmsLogin} = require('../models'); 
 const {formatResponse} = require('../utils/unifieFormat')
 const {setAccessToken,setRefreshToken} = require('../utils/JWT')
 
@@ -26,7 +26,7 @@ login: async (req, res) => {
     res.status(statusCode).send(formatResponse(statusCode, errorMessage));
     } else {
       // 登录成功后，删除验证码
-      await SmsLoginModel.updateOne({ _id: result._id }, { sms_code: null });
+      await SmsLogin.updateOne({ _id: result._id }, { sms_code: null });
 
       const accessToken = setAccessToken({ id: result._id, mobile: result.mobile });
       const refreshToken = setRefreshToken({ id: result._id, mobile: result.mobile });

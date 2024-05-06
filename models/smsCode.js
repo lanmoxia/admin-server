@@ -7,6 +7,4 @@ const SmsCodeSchema = new Schema({
   createdAt: { type: Date, default: Date.now, expires: '1m' } // 验证码5分钟后过期
 });
 
-const SmsCodeModel = mongoose.model('Sms_code', SmsCodeSchema);
-
-module.exports = SmsCodeModel;
+module.exports = SmsCodeSchema;

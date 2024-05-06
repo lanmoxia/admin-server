@@ -1,11 +1,11 @@
-const Permission = require('../model/PermissionModel');
+const {Menu} = require('../models');
 const permissionsData = require('../data/permissionsData');
-const Icon = require('../model/IconModel');
+const {Icon} = require('../models');
 
 const seedPermissions = async () => {
   try {
     // 清空数据库 方便测试
-    //return await Permission.deleteMany({})
+    //return await Menu.deleteMany({})
 
      // 查找所有图标并创建映射
      const icons = await Icon.find({});
@@ -29,10 +29,10 @@ const seedPermissions = async () => {
     replaceIcons(permissionsData);
 
     // 检查数据库中是否已有数据
-    const count = await Permission.countDocuments();
+    const count = await Menu.countDocuments();
     if (count === 0) {
       // 如果没有数据，则填充权限数据
-      await Permission.insertMany(permissionsData);
+      await Menu.insertMany(permissionsData);
     } else {
       // 如果已有数据，则跳过填充
       console.log('数据库中已存在权限数据，跳过填充');

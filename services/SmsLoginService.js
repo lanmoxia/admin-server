@@ -1,10 +1,10 @@
-const SmsLoginModel = require('../model/SmsLoginModel');
+const {SmsLogin} = require('../models')
 const bcrypt = require('bcrypt');
 
 const SmsLoginService = {
   login: async ({ mobile, sms_code }) => {
     try {
-      const user = await SmsLoginModel.findOne({ mobile });
+      const user = await SmsLogin.findOne({ mobile });
 
       if (!user) {
         return { error: 'MobileNotFound' };

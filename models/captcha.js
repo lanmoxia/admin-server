@@ -7,7 +7,4 @@ const captchaSchema = new Schema({
   createdAt: { type: Date, default: Date.now, expires: '5m' } // 创建时间，默认5分钟后过期
 });
 
-// 创建模型
-const CaptchaModel = mongoose.model('Captcha', captchaSchema);
-
-module.exports = CaptchaModel;
+module.exports = captchaSchema;

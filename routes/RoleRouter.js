@@ -1,21 +1,14 @@
-// RoleRouter.js
-var express = require('express');
-var RoleRouter = express.Router();
-const RoleController = require('../controllers/RoleController');
+// // RoleRouter.js
+// var express = require('express');
+// var RoleRouter = express.Router();
+// const roleCtrl = require('../controllers/role');
+// // 角色管理路由
+// RoleRouter.get('/roles', roleCtrl.list)
+//   .post('/roles', roleCtrl.create)
+//   .put('/roles/:id', roleCtrl.update)
+//   .delete('/roles/:id', roleCtrl.delete)
+//   .get('/roles/:id', roleCtrl.one)
+//   .patch('/roles/:id/menus',roleCtrl.updateMenus) // 用户分配权限
+//   .patch('/roles/:id/resources',roleCtrl.updateResources) // 用户分配按钮
 
-// 获取角色列表
-RoleRouter.get('/list', RoleController.getRoles);
-
-// 获取单个角色
-RoleRouter.get('/:id', RoleController.getRoleById);
-
-// 创建新角色
-RoleRouter.post('/', RoleController.createRole);
-
-// 更新角色
-RoleRouter.put('/:id', RoleController.updateRole);
-
-// 删除角色
-RoleRouter.delete('/:id', RoleController.deleteRole);
-
-module.exports = RoleRouter;
+// module.exports = RoleRouter;

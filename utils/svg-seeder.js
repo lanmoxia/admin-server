@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 // 删除这行：const mongoose = require('mongoose');
-const Icon = require('../model/IconModel'); // 导入已定义的Icon模型
+const {Icon} = require('../models'); // 导入已定义的Icon模型
 
 const svgDirectory = path.join(__dirname, '../public/svg');
 

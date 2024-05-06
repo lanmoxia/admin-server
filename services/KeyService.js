@@ -1,8 +1,8 @@
-const KeyModel = require('../model/KeyModel');
+const {Key} = require('../models')
 
 const storePrivateKey = async (privateKey) => {
   try {
-    const keyDocument = new KeyModel({ privateKey });
+    const keyDocument = new Key({ privateKey });
     await keyDocument.save();
     console.log('Private key has been saved successfully.');
   } catch (error) {

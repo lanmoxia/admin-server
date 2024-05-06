@@ -1,7 +1,7 @@
-var express = require('express')
-var UserRouter = express.Router()
-const UserController = require('../controllers/UserController')
+// var express = require('express')
+// var UserRouter = express.Router()
+// // const UserCtrl = require('../controllers/User')
 
-UserRouter.post('/user/register', UserController.register)
+// // UserRouter.post('/user/register', UserCtrl.register)
 
-module.exports = UserRouter
+// module.exports = UserRouter

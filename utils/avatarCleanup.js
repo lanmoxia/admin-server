@@ -2,12 +2,12 @@
 const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
-const UserModel = require('../model/UserModel');
+const {User} = require('../models');
 
 const runAvatarCleanup = () => {
   cron.schedule('0 0 * * *', async () => { // 每天午夜 00:00 执行
     console.log('执行了定时任务')
-    const users = await UserModel.find({}).select('avatar');
+    const users = await User.find({}).select('avatar');
     const avatarSet = new Set(users.map(user => user.avatar));
 
     fs.readdir(path.join(__dirname, '../public/avatars'), (err, files) => {

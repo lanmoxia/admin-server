@@ -1,4 +1,4 @@
-const SmsLoginModel = require('../model/SmsLoginModel');
+const {SmsCode} = require('../models')
 
 const SmsCodeService = {
   // 获取短信验证码
@@ -6,7 +6,7 @@ const SmsCodeService = {
     try {
       let code = Math.floor(100000 + Math.random() * 900000).toString();
       // 将加密后的验证码存储到数据库
-      const user = await SmsLoginModel.findOne({ mobile });
+      const user = await SmsCode.findOne({ mobile });
       if (user) {
         // 由于 Mongoose 的文档缓存导致当您调用 findOne 方法时，Mongoose 会返回一个文档对象
         // 这个对象会在您对其进行操作时保持状态。
@@ -16,7 +16,7 @@ const SmsCodeService = {
         user.lastRequestedCodeAt = new Date()
         await user.save();
       } else {
-        newUser = new SmsLoginModel({mobile,sms_code: code});
+        newUser = new SmsCode({mobile,sms_code: code});
         await newUser.save();
       }
       // 实际应用中不应返回验证码，这里只是示例

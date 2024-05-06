@@ -1,4 +1,5 @@
 const captcha = require('svg-captcha');
+const {Captcha} = require('../models')
 
 const CaptchaService = {
   generateCaptcha: () => {

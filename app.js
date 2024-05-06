@@ -5,9 +5,9 @@ var cookieParser = require('cookie-parser');
 
 var logger = require('morgan');
 var session = require('express-session');
-const UserRouter = require('./routes/UserRouter')
-const RoleRouter = require('./routes/RoleRouter')
-const PermissionRouter = require('./routes/PermissionRouter')
+const Router = require('./routes')
+// const RoleRouter = require('./routes/RoleRouter')
+// const MenuRouter = require('./routes/MenuRouter')
 const runAvatarCleanup = require('./utils/avatarCleanup');
 const cors = require('cors');
 const auth = require('./utils/auth'); 
@@ -40,14 +40,14 @@ app.use(session({
   }
 }))
 
-// 角色路由
-app.use('/role', RoleRouter)
+// // 角色路由
+// app.use('/role', RoleRouter)
 
-// 权限路由
-app.use('/permission', PermissionRouter)
+// // 权限路由
+// app.use('/api', MenuRouter)
 
 // API路由
-app.use(UserRouter)
+app.use('/api',Router)
 
 
 // catch 404 and forward to error handler

@@ -37,6 +37,4 @@ SmsLoginSchema.pre('save', async function(next) {
   next();
 });
 
-const SmsLoginModel = mongoose.model('mobile', SmsLoginSchema);
-
-module.exports = SmsLoginModel;
+module.exports = SmsLoginSchema;

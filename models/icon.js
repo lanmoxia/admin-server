@@ -12,6 +12,4 @@ const iconSchema = new mongoose.Schema({
   }
 });
 
-const Icon = mongoose.model('Icon', iconSchema);
-
-module.exports = Icon;
+module.exports = iconSchema;

@@ -6,11 +6,67 @@ const userAvatarUrl = 'http://localhost:3000/avatars/user.jpg';
 
 // 用户模型定义
 const UserType = {
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  avatar: { type: String, default: userAvatarUrl },
-  roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }]
-};
+  /**
+   * 用户名
+   */
+  username: {
+    type: String,
+    unique: true, // 唯一性
+    required: true
+  },
+  /**
+   * 用户密码
+   */
+  password: {
+    type: String,
+    required: true,
+    select: false // 默认查询不会返回该字段
+  },
+  /**
+   * 姓名
+   */
+  name: {
+    type: String,
+    default: '', 
+  },
+  /**
+   * 用户头像
+   */
+  avatar: {
+    type: String,
+    default: ''
+  },
+  /**
+   * 角色
+   */
+  roles: {
+    type: [Schema.Types.ObjectId],
+    ref: 'Role'
+  },
+  /**
+   * 状态
+   * 0： 未启用
+   * 1：启用
+   */
+  status: {
+    type: Number,
+    default: 0
+  },
+  /**
+   * 创建时间
+   */
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  /**
+   * 更新时间
+   */
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+}
 
 // 启用timestamps自动添加创建和更新时间戳
 let UserSchema = new Schema(UserType, { timestamps: true });
@@ -21,7 +77,7 @@ UserSchema.pre('save', async function (next) {
     const userCount = await mongoose.model('User').countDocuments();
     if (userCount === 0) {
       // 如果是第一个用户，则分配管理员角色
-      const adminRole = await mongoose.model('Role').findOne({ name: 'admin' });
+      const adminRole = await mongoose.model('Role').findOne({ name: 'supAdmin' });
       this.roles = [adminRole._id];
       this.avatar = adminAvatarUrl;
     } else {
@@ -38,6 +94,4 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-const UserModel = mongoose.model('User', UserSchema);
-
-module.exports = UserModel;
+module.exports = UserSchema
