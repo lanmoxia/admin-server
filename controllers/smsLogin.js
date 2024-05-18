@@ -20,7 +20,6 @@ login: async (req, res) => {
       case 'ServerError':
         statusCode = 500; // 服务器错误应该返回500状态码
         errorMessage = '服务器错误';
-        console.log('error', result.details); // 记录错误详情
         break;
     }
     res.status(statusCode).send(formatResponse(statusCode, errorMessage));

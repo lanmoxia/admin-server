@@ -1,172 +1,143 @@
-// const UserSvc = require('../services/UserService')
-// const {setAccessToken,setRefreshToken} = require('../utils/JWT')
-// const adminData = require('../data/admin')
-// const {formatResponse} = require('../utils/unifieFormat')
-// const imageUploader = require('../utils/upload')
+const userSvc = require('../services/user')
+const {formatResponse} = require('../utils/unifieFormat')
 
-// const UserController = {
-//   // 获取用户列表
-//   list: async(req,res) => {
-//     try{
-//       const users = await UserSvc.register(req.body)
-//       res.status(200).json(formatResponse(200,"获取列表成功",users))
-//     } catch (error){
-//       if (error.error === 'ServerError') {
-//         res.status(500).json({ message: '服务器错误', details: error.details })
-//       } else {
-//         res.status(400).json({ message: '未知错误', details: error })
-//       }
-//     }
-//   },
-//   // 注册
-//   create: async(req, res) => {
-//     // 验证码
-//     if (!req.body.captcha_code || !req.session.captcha) {
-//       req.session.captcha = null;
-//       return res.status(200).json(formatResponse(10039, '验证码缺失'));
-//     }
+// 获取用户列表
+exports.list = async(req,res,next) => {
+  try{
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const {users, totalItems, curPage, pageSize } = await userSvc.list(page, limit)
+    res.status(200).json(formatResponse(200,"获取成功",{
+      users,
+      page_info: {
+        cur_page: curPage.toString(),
+        page_size: pageSize.toString(),
+        total_items: totalItems.toString()
+      }
+    }))
+  } catch (error){
+    next(error)
+  }
+}
 
-//     // 转换为统一的大小写进行比较
-//     const inputCaptcha = req.body.captcha_code.toLowerCase();
-//     const sessionCaptcha = req.session.captcha.toLowerCase();
-
-//     // 检查验证码是否匹配
-//     if (inputCaptcha !== sessionCaptcha) {
-//       req.session.captcha = null;
-//       return res.status(200).json(formatResponse(10040, '验证码错误'));
-//     }
-
-//     // 清除会话中的验证码
-//     req.session.captcha = null;
-
-//     // 处理用户注册
-//     const result = await UserSvc.register(req.body)
-//     console.log(result)
-//     if (result.error) {
-//       if (result.error === 'UserAlreadyExists') {
-//         return res.send(formatResponse(20001, '用户已存在'));
-//       } else {
-//         // 处理其他可能的错误
-//         return res.send(formatResponse(500, '服务器错误', result.details));
-//       }
-//     }
+// 创建用户
+exports.create = async(req,res,next) => {
+  try{
+    // if (!req.body.captcha_code || !req.session.captcha) {
+    //   req.session.captcha = null
+    //   // 验证码不存在
+    //   return res.status(200).json(formatResponse(10039, '验证码缺失'))
+    // }
   
-//     // 成功响应
-//     const newUser = result.user;
-//     res.status(200).json(formatResponse(200, '注册成功', {
-//       id: newUser._id,
-//       username: newUser.username,
-//       avatar: newUser.avatar
-//     }));
-//   },
-//   // 登录
-//   login: async(req, res) => {
-//     // 确保验证码存在
-//     if (!req.body.captcha_code || !req.session.captcha) {
-//       req.session.captcha = null;
-//       // 验证码不存在
-//       return res.status(200).json(formatResponse(10039, '验证码缺失'));
-//     }
+    // // 转换为统一的大小写进行比较
+    // const inputCaptcha = req.body.captcha_code.toLowerCase()
+    // const sessionCaptcha = req.session.captcha.toLowerCase()
+  
+    // // 检查验证码是否匹配
+    // if (inputCaptcha !== sessionCaptcha) {
+    //   req.session.captcha = null
+    //   // 验证号码过期或错误
+    //   return res.status(200).json(formatResponse(10040, '验证码错误'))
+    // }
+    
+    // 处理注册
+    const result = await userSvc.create(req.body)
+    if(result){
+      if(result.errorMessage === 'UserAlreadyExists'){
+        return res.status(404).json(formatResponse(404,'用户已存在'))
+      }
+    }
 
-//     // 转换为统一的大小写进行比较
-//     const inputCaptcha = req.body.captcha_code.toLowerCase();
-//     const sessionCaptcha = req.session.captcha.toLowerCase();
+      // 避免出现由于同时触发了两个异步登录请求，
+      //第一个请求的验证码验证成功了，但是第二个请求的验证码为空，从而导致验证码缺失错误的情况。
+     // 在这里清除验证码
+    //  req.session.captcha = null
 
-//     // 检查验证码是否匹配
-//     if (inputCaptcha !== sessionCaptcha) {
-//       req.session.captcha = null;
-//       // 验证号码过期或错误
-//       return res.status(200).json(formatResponse(10040, '验证码错误'));
-//     }
+    res.status(200).json(formatResponse(200,"创建成功"))
+  } catch (err){
+    next(err)
+  }
+}
 
-//     // 清除会话中的验证码
-//     req.session.captcha = null;
+// 更新用户
+exports.update = async(req,res,next) => {
+  try{
+    const result = await userSvc.update(req.params.id,req.body)
+    res.status(200).json(formatResponse(200,"更新成功",result))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//     // 处理用户登录
-//     const result = await UserSvc.login(req.body);
-//     if (result.error) {
-//       let statusCode = 401;
-//       let errorMessage = '登录失败';
-//       switch(result.error) {
-//         case 'UserNotFound':
-//           statusCode = '1004'
-//           errorMessage = '用户未找到';
-//           break;
-//         case 'PasswordMismatch':
-//           statusCode = '1005'
-//           errorMessage = '账户和密码不匹配';
-//           break;
-//         case 'ServerError':
-//           errorMessage = '服务器错误';
-//           statusCode = 500; // 服务器错误应该返回500状态码
-//           break;
-//       }
-//       return res.status(statusCode).send(formatResponse(statusCode, errorMessage));
-//     }
+// 删除用户
+exports.delete = async(req,res,next) => {
+  try{
+    const result = await userSvc.delete(req.params.id)
+    if(result){
+      if(result.errorMessage === 'UserNotFound'){
+        return res.status(404).json(formatResponse(404,'用户不存在'))
+      }
+    }
+    res.status(200).json(formatResponse(200,'删除成功'))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//     // 成功响应
-//     const user = result;
-//     const accessToken = setAccessToken({ id: user._id, username: user.username });
-//     const refreshToken = setRefreshToken({ id: user._id, username: user.username });
-//     res.status(200).json(formatResponse(200, '登录成功', {
-//       info: {
-//         id: user._id,
-//         username: user.username,
-//         avatar: user.avatar
-//       },
-//       accessToken,
-//       refreshToken
-//     }));
-//   },
-//   // 获取用户
-//   getList: (req,res) => {
-//     try{
-//       res.status(200).json(formatResponse(200,'获取成功',adminData))
-//     } catch(error) {
-//       res.status(500).send(formatResponse(500,"服务器错误"))
-//     }
-//   },
-//   // 用户更新
-//   useAvatarUpdate: async (req, res) => {
-//     imageUploader(req, res, async function(err) {
-//       if (err) {
-//         // 如果imageUploader中发生错误，处理错误
-//         return res.send(formatResponse(500, '上传错误'));
-//       }
-//       const { id } = req.body;
-//       const filename = req.file.filename;
-//       const result = await UserSvc.useAvatarUpdate(id, filename);
-//       if (result.error) {
-//         let statusCode = 1004;
-//         let errorMessage = '用户未找到';
-//         if (result.error === 'ServerError') {
-//           statusCode = 500;
-//           errorMessage = '服务器错误';
-//         }
-//         return res.status(statusCode).send(formatResponse(statusCode, errorMessage));
-//       }
-//       // 成功响应
-//       const { avatar } = result;
-//       return res.status(200).json(formatResponse(200, '修改成功', { avatar }));
-//     });
-//   },
+// 查询单个用户
+exports.one = async (req,res,next) => {
+  try{
+    const result = await userSvc.one(req.params.id)
+    if(result){
+      if(result.errorMessage === 'UserNotFound'){
+        return res.status(404).json(formatResponse(404,'用户不存在'))
+      }
+    }
+    res.status(200).json(formatResponse(200,'获取成功',result))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//   // 获取公钥
-//   getPublicKey: async (req,res) => {
-//     try {
-//       const publicKey = await UserSvc.getPublicKey();
-//       res.status(200).send(formatResponse(200, '获取成功',{publicKey}));
-//     } catch (error) {
-//       res.status(500).send('Server error');
-//     }
-//   }
-// }
+// 用户权限
+exports.userPermissions = async(req,res,next) => {
+  try{
+    const result = await userSvc.userPermissions(req.user)
+    res.status(200).send(formatResponse(200, '获取成功', result.roles))
+  } catch (error){
+    next(error)
+  }
+}
 
-// module.exports = UserController
+// 关联角色
+exports.updateRoles = async (req,res,next) => {
+  try{
+    const result = await userSvc.updateRoles(req.params.id,req.body.roles)
+    if(result){
+      if(result.errorMessage === 'UserNotFound'){
+        return res.status(404).json(formatResponse(404,'用户不存在'))
+      }
+    }
+    res.status(200).json(formatResponse(200,'设置成功',result))
+  } catch(error){
+    throw error
+  }
+}
 
-exports.list = async(req,res) => {}
-exports.create = async(req,res) => {}
-exports.update = async(req,res) => {}
-exports.delete = async(req,res) => {}
-exports.one = async (req,res) => {}
-exports.updateRoles = async (req,res) => {}
+// 批量创建用户
+exports.batchCreate = async (req,res,next) => {
+  try{
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded.' })
+    }
+
+    const result = await userSvc.batchCreate(req.file.path)
+    // 文件上传到服务器才需要的
+    // 清理上传的临时文件
+    // fs.unlinkSync(req.file.path)
+    res.status(200).json(formatResponse(200,'创建成功',result))
+  } catch (error) {
+    console.log('controller',error)
+    next(error)
+  }
+}

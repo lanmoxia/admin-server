@@ -1,27 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 const bcrypt = require('bcrypt');
-const Schema = mongoose.Schema;
-const adminAvatarUrl = 'http://localhost:3000/avatars/admin.png';
-const userAvatarUrl = 'http://localhost:3000/avatars/user.jpg';
+const adminAvatarUrl = 'http://localhost:3000/avatars/admin.png'
+const userAvatarUrl = 'http://localhost:3000/avatars/user.jpg'
 
-// 用户模型定义
-const UserType = {
+
+const MobileUserType = {
+
   /**
-   * 用户名
+   * 手机号
    */
-  username: {
-    type: String,
-    unique: true, // 唯一性
-    required: true
-  },
-  /**
-   * 用户密码
-   */
-  password: {
+  mobile: {
     type: String,
     required: true,
-    select: false // 默认查询不会返回该字段
+    unique: true
   },
+
+  /**
+   * 手机验证码
+   */
+  sms_code: {
+    type: String,
+    required: true
+  },
+
   /**
    * 姓名
    */
@@ -29,6 +31,7 @@ const UserType = {
     type: String,
     default: '', 
   },
+
   /**
    * 用户头像
    */
@@ -36,6 +39,7 @@ const UserType = {
     type: String,
     default: ''
   },
+
   /**
    * 角色
    */
@@ -43,6 +47,7 @@ const UserType = {
     type: [Schema.Types.ObjectId],
     ref: 'Role'
   },
+
   /**
    * 状态
    * 0： 未启用
@@ -52,6 +57,7 @@ const UserType = {
     type: Number,
     default: 0
   },
+
   /**
    * 创建时间
    */
@@ -59,6 +65,7 @@ const UserType = {
     type: Date,
     default: Date.now
   },
+
   /**
    * 更新时间
    */
@@ -69,18 +76,17 @@ const UserType = {
 }
 
 // 启用timestamps自动添加创建和更新时间戳
-let UserSchema = new Schema(UserType, { timestamps: true })
+let MobileUserSchema = new Schema(MobileUserType, { timestamps: true });
 
-// 预保存钩子
-UserSchema.pre('save', async function (next) {
+MobileUserSchema.pre('save', async function(next) {
   if (this.isNew) {
-    const userCount = await mongoose.model('User').countDocuments()
+    const userCount = await mongoose.model('MobileUser').countDocuments();
     if (userCount === 0) {
       // 如果是第一个用户，则分配管理员角色
       const adminRole = await mongoose.model('Role').findOne({ name: 'supAdmin' })
       if(!adminRole)  next(new Error('Admin role not found'))
-      this.roles = [adminRole._id]
-      this.avatar = adminAvatarUrl
+      this.roles = [adminRole._id];
+      this.avatar = adminAvatarUrl;
     } else {
       // 否则分配普通用户角色
       const userRole = await mongoose.model('Role').findOne({ name: 'user' })
@@ -88,12 +94,10 @@ UserSchema.pre('save', async function (next) {
       this.roles = [userRole._id]
       this.avatar = userAvatarUrl
     }
-    
-    // 密码加密
-    const hashedPassword = await bcrypt.hash(this.password, 10)
-    this.password = hashedPassword
+    // 加密验证码
+    this.sms_code = await bcrypt.hash(this.sms_code, 8)
   }
   next()
 })
 
-module.exports = UserSchema
+module.exports = MobileUserSchema

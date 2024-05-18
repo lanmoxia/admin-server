@@ -1,34 +1,32 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
+var createError = require('http-errors')
+var express = require('express')
+var path = require('path')
+var cookieParser = require('cookie-parser')
 
-var logger = require('morgan');
-var session = require('express-session');
+var logger = require('morgan')
+var session = require('express-session')
 const Router = require('./routes')
-// const RoleRouter = require('./routes/RoleRouter')
-// const MenuRouter = require('./routes/MenuRouter')
-const runAvatarCleanup = require('./utils/avatarCleanup');
-const cors = require('cors');
-const auth = require('./utils/auth'); 
-var app = express();
+const runAvatarCleanup = require('./utils/avatarCleanup')
+const cors = require('cors')
+const auth = require('./utils/auth')
+var app = express()
 
 
 // 允许所有来源的跨域请求
-app.use(cors({ origin: '*'}));
+app.use(cors({ origin: '*'}))
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'jade')
 
-app.use(logger('dev'));
-app.use(express.json());
+app.use(logger('dev'))
+app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 // 身份验证中间件
-// app.use(auth);
+app.use('/api',auth)
 
 // 关于验证码的中间件
 app.use(session({
@@ -40,11 +38,6 @@ app.use(session({
   }
 }))
 
-// // 角色路由
-// app.use('/role', RoleRouter)
-
-// // 权限路由
-// app.use('/api', MenuRouter)
 
 // API路由
 app.use('/api',Router)
@@ -52,27 +45,26 @@ app.use('/api',Router)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  next(createError(404))
 });
 
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get('env') === 'development' ? err : {}
 
   if (req.originalUrl.startsWith('/api/')) {
-    // return JSON response for API calls
     res.status(err.status || 500).json({
       code: err.code || 'UNEXPECTED_ERROR',
       message: err.message || 'An unexpected error occurred'
-    });
+    })
   } else {
-    res.status(err.status || 500);
-    res.render('error');
+    res.status(err.status || 500)
+    res.render('error')
   }
 });
 
-runAvatarCleanup();
+runAvatarCleanup()
 
-module.exports = app;
+module.exports = app

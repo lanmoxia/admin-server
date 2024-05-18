@@ -42,7 +42,7 @@ const MenuSchema = new Schema({
    */
   hidden: {
     type: Boolean,
-    default: false
+    default: true
   },
   /**
  * 状态
@@ -73,6 +73,25 @@ const MenuSchema = new Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  }
+})
+
+// 在保存文档前替换icon
+MenuSchema.pre('save', async function(next) {
+  // 在这里，`this` 是您要保存的菜单文档
+  try {
+    //查找Icon记录
+    const iconRecord = await mongoose.model('Icon').findOne({name: this.icon})
+
+    // 替换icon字段
+    if (iconRecord) {
+      // 去除 XML声明和 DOCTYPE 声明
+      const cleanedIconPath = iconRecord.path.replace(/<\?xml.*?\?>|<!DOCTYPE.*?>/g, '');
+      this.icon = cleanedIconPath
+    }
+    next()
+  } catch(err){
+    next(err)
   }
 })
 

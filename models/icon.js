@@ -6,10 +6,10 @@ const iconSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  data: {
+  path: {
     type: String,
     required: true
   }
-});
+})
 
 module.exports = iconSchema;

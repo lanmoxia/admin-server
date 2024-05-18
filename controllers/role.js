@@ -1,90 +1,114 @@
-// const RoleService = require('../services/RoleService');
-// const { formatResponse } = require('../utils/unifieFormat')
+const roleSvc = require('../services/role')
+const {formatResponse} = require('../utils/unifieFormat')
 
-// const RoleController = {
-//   list: async(req,res) => {},
-//   create: async(req,res) => {},
-//   update: async(req,res) => {},
-//   delete: async(req,res) => {},
-//   one: async(req,res) => {},
-//   updateMenus: async(req,res) => {},
-//   updateResources: async(req,res) => {},
-//   // 获取角色列表
-//   getRoles: async (req, res) => {
-//     try {
-//       const roles = await RoleService.getRoles();
-//       res.status(200).json(formatResponse(200, '获取成功', roles));
-//     } catch (error) {
-//       res.status(500).json(formatResponse(500, '服务器错误', error.message));
-//     }
-//   },
+// 获取角色列表
+exports.list = async(req,res,next) => {
+  try{
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 20
+    const {roles, totalItems, curPage, pageSize } = await roleSvc.list(page, limit)
+    res.status(200).json(formatResponse(200,"获取成功",{
+      roles,
+      page_info: {
+        cur_page: curPage.toString(),
+        page_size: pageSize.toString(),
+        total_items: totalItems.toString()
+      }
+    }))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//   // 根据ID获取角色
-//   getRoleById: async (req, res) => {
-//     try {
-//       const role = await RoleService.getRoleById(req.params.id);
-//       if (role) {
-//         res.status(200).json(formatResponse(200, '获取成功', role));
-//       } else {
-//         res.status(404).json(formatResponse(404, '角色不存在'));
-//       }
-//     } catch (error) {
-//       res.status(500).json(formatResponse(500, '服务器错误', error.message));
-//     }
-//   },
+// 创建角色
+exports.create = async(req,res,next) => {
+  try{
+    const result = await roleSvc.create(req.body)
+    if(result){
+      if(result.errorMessage === 'RoleAlreadyExists'){
+        return res.status(404).json(formatResponse(404,'角色已存在'))
+      }
+    }
+    res.status(200).json(formatResponse(200,"创建成功"))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//   // 创建新角色
-//   createRole: async (req, res) => {
-//     try {
-//       const roleData = req.body;
-//       const role = await RoleService.createRole(roleData);
-//       res.json(formatResponse(role, '角色创建成功'));
-//     } catch (error) {
-//       res.status(400).json(formatResponse(null, error.message, false));
-//     }
-//     // try {
-//     //   const newRole = await RoleService.createRole(req.body);
-//     //   res.status(201).json(formatResponse(201, '创建成功', newRole));
-//     // } catch (error) {
-//     //   if (error.message === '角色已存在') {
-//     //     res.status(400).json(formatResponse(400, error.message));
-//     //   } else {
-//     //     res.status(500).json(formatResponse(500, '服务器错误', error.message));
-//     //   }
-//     // }
-//   },
+// 更新角色
+exports.update = async(req,res,next) => {
+  try{
+    const result = await roleSvc.update(req.params.id,req.body)
+    res.status(200).json(formatResponse(200,"更新成功",result))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//   // 更新角色
-//   updateRole: async (req, res) => {
-//     try {
-//       const updatedRole = await RoleService.updateRole(req.params.id, req.body);
-//       if (updatedRole) {
-//         res.status(200).json(formatResponse(200, '更新成功', updatedRole));
-//       } else {
-//         res.status(404).json(formatResponse(404, '角色不存在'));
-//       }
-//     } catch (error) {
-//       res.status(500).json(formatResponse(500, '服务器错误', error.message));
-//     }
-//   },
+// 删除角色
+exports.delete = async(req,res,next) => {
+  try{
+    const result = await roleSvc.delete(req.params.id)
+    if(result){
+      if(result.errorMessage === 'RoleNotFound'){
+        return res.status(404).json(formatResponse(404,'用户不存在'))
+      }
+    }
+    res.status(200).json(formatResponse(200,'删除成功'))
+  } catch(error){
+    next(error) 
+  }
+}
 
-//   // 删除角色
-//   deleteRole: async (req, res) => {
-//     try {
-//       await RoleService.deleteRole(req.params.id);
-//       res.status(200).json(formatResponse(200, '删除成功'));
-//     } catch (error) {
-//       res.status(500).json(formatResponse(500, '服务器错误', error.message));
+// 查询角色
+exports.one = async (req,res,next) => {
+  try{
+    const result = await roleSvc.one(req.params.id)
+    if(result.errorMessage === 'RoleNotFound'){
+      return res.status(404).json(formatResponse(404,'用户不存在'))
+    }
+    res.status(200).json(formatResponse(200,'获取成功',result))
+  } catch(error){
+    next(error) 
+  }
+}
+
+// 分配权限
+exports.permissionAssignment = async (req,res,next) => {
+  try {
+    const result = await roleSvc.permissionAssignment(req.params.id,req.body)
+    if(result.errorMessage === 'RoleNotFound'){
+      return res.status(404).json(formatResponse(404,'角色不存在'))
+    }
+    res.status(200).json(formatResponse(200,'设置成功',result))
+  } catch(error){
+    next(error) 
+  }
+}
+
+// // 关联菜单
+// exports.roleMenuAssociation = async (req,res,next) => {
+//   try{
+//     console.log(req.params.id,req.body)
+//     const result = await roleSvc.roleMenuAssociation(req.params.id,req.body)
+//     if(result.errorMessage === 'RoleNotFound'){
+//       return res.status(404).json(formatResponse(404,'角色不存在'))
 //     }
+//     res.status(200).json(formatResponse(200,'设置成功',result))
+//   } catch(error){
+//     next(error) 
 //   }
-// };
+// }
 
-// module.exports = RoleController;
-
-exports.list = async(req,res) => {}
-exports.create = async(req,res) => {}
-exports.update = async(req,res) => {}
-exports.delete = async(req,res) => {}
-exports.one = async (req,res) => {}
-exports.updateMenus = async (req,res) => {}
-exports.updateResources = async (req,res) => {}
+// // 关联按钮
+// exports.roleResourceAssociation = async (req,res,next) => {
+//   try{
+//     const result = await roleSvc.roleResourceAssociation(req.params.id,req.body)
+//     if(result.errorMessage === 'RoleNotFound'){
+//       return res.status(404).json(formatResponse(404,'角色不存在'))
+//     }
+//     res.status(200).json(formatResponse(200,'设置成功',result))
+//   } catch(error){
+//     next(error) 
+//   }
+// }

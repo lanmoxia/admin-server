@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const secret = 'lanmoxia'
 
-const setAccessToken = (payload = {},expiresIn = '1h') =>{
+const setAccessToken = (payload = {},expiresIn = '4d') =>{
   return jwt.sign(payload, secret, {expiresIn})
 }
 
