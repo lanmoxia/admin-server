@@ -13,7 +13,7 @@ var app = express()
 
 
 // 允许所有来源的跨域请求
-app.use(cors({ origin: '*'}))
+app.use(cors({ origin: ['http://192.168.50.171:8080', 'http://127.0.0.1:8080']}))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
