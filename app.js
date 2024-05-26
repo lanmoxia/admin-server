@@ -11,9 +11,15 @@ const cors = require('cors')
 const auth = require('./utils/auth')
 var app = express()
 
-
+var corsOptions = {
+  origin: 'https://lanmoxia.github.io', // 您的GitHub Pages域名
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 允许的HTTP方法
+  allowedHeaders: 'Content-Type,Authorization', // 允许的HTTP头部
+  credentials: true, // 是否允许发送Cookie
+  optionsSuccessStatus: 200 // 对于一些老旧浏览器的OPTIONS请求响应成功状态码
+}
 // 允许所有来源的跨域请求
-app.use(cors())
+app.use(cors(corsOptions))
 
 app.use(logger('dev'))
 app.use(express.json())
@@ -37,12 +43,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // API路由
 app.use('/api',Router)
-
-
-// 捕获 404 错误
-app.use(function(req, res, next) {
-  next(createError(404))
-})
 
 // 错误处理中间件
 app.use(handleErrors)
