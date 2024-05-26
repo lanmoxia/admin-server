@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 exports.captchar = () => {
   try {
     // 验证码生成错误测试
-    // const shouldFail = true; // 或者使用某种条件来触发失败
+    // const shouldFail = true
     // if (shouldFail) {
     //   throw new Error('故意引入的错误');
     // }
@@ -18,12 +18,11 @@ exports.captchar = () => {
       noise: 2,
       color: true,
       background: '#cc9966'
-    });
+    })
+    if(cap === null) throw {status: 500, errno: '100500', errmsg: '验证码生成失败' }
     return cap
   } catch (error) {
-    return { error: 'ServerError', details: error.message }
-    // 验证码生成错误测试
-   //return { error: true, code: 'CAPTCHA_GENERATION_FAILED', details: error.message };
+    throw error
   }
 }
 
@@ -31,14 +30,13 @@ exports.captchar = () => {
 exports.login = async(formData) => {
   try{
     let user = await User.findOne({ username: formData.username }).select('+password')
-    if (user === null) {
-      return { errorMessage: 'UserNotFound' }
-    }
+    if (user === null) throw { errno: '104401', errmsg: '账号未找到'}
     // 校验密码
     const isMatch = await bcrypt.compare(formData.password, user.password)
-    if (!isMatch) {
-      return { errorMessage: 'PasswordMismatch' }
-    }
+    if (!isMatch) throw { errno: '105401', errmsg: '账户或密码错误'}
+
+    // 校验用户状态
+    if (user.status === 0) throw {errno: '106401', errmsg: '账户已被禁用'}
     return user
   } catch (error) {
     throw error
@@ -58,24 +56,20 @@ exports.mobileCode = async(mobile) => {
       newUser = new MobileUser({mobile,sms_code:code})
       await newUser.save()
     }
+    if(cap === null) throw {status: 500, errno: '101500', errmsg: '验证码生成失败' }
     return code
   } catch (error) {
     throw error
   }
 }
 
-
 // 手机登录
 exports.mobileLogin = async(formData) => {
   try{
     const user = await MobileUser.findOne({ mobile: formData.mobile })
-    if (user === null) {
-      return { errorMessage: 'UserNotFound' }
-    }
+    if (!user) throw { errno: '106401', errmsg: '账号未找到'}
     const isMatch = await bcrypt.compare(formData.sms_code, user.sms_code)
-    if (!isMatch) {
-      return { errorMessage: 'CodeMismatch' }
-    }
+    if (!isMatch) throw { errno: '107401', errmsg: '验证码错误'}
     return user
   } catch (error) {
     throw error
@@ -86,9 +80,8 @@ exports.mobileLogin = async(formData) => {
 exports.permissionList = async() => {
   try{
     // 分别查询菜单和按钮
-    const menus = await Menu.find().lean();
-    const buttons = await Resource.find().lean();
-
+    const menus = await Menu.find().lean()
+    const buttons = await Resource.find().lean()
     // 返回包含 menus 和 buttons 的对象
     return {
       menus,
@@ -100,20 +93,24 @@ exports.permissionList = async() => {
 }
 
 // 刷新 token
-exports.refreshToken = async() => {
+exports.refreshToken = async(token) => {
   try{
     const decoded = await jwt.verify(token, secret)
+    if (!decoded || !decoded.id || !decoded.username) {
+      throw { errno: "108401", errmsg: "refreshToken 无效" }
+    }
     const id = decoded.id
     const username = decoded.username
     const newAccessToken = setAccessToken({ id, username })
     const newRefreshToken = setRefreshToken({ id, username })
     return { 
-      code: 200,
-      message: '长token有效,请求到新的token',
       accessToken: newAccessToken,
       refreshToken: newRefreshToken
     }
   } catch (error) {
+    if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError'){
+      throw { errno: "108401", errmsg: "refreshToken 无效" }
+    }
     throw error
   }
 }
@@ -151,9 +148,6 @@ exports.search = async ({ username, role, status, dateRange, page, limit }) => {
 // 文件上传
 exports.uploadFile = (file) => {
   try {
-    if (!file) {
-      throw new Error('No file uploaded');
-    }
     // 返回文件路径
     return {
       filename: file.filename,

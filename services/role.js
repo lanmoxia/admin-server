@@ -16,9 +16,7 @@ exports.list = async(page,limit) => {
 exports.create = async(userData) => {
   try {
     const existingRole = await Role.findOne({ name: userData.name })
-    if (existingRole) {
-      return {statusCode: 20001, errorMessage: 'RoleAlreadyExists'}
-    }
+    if(existingRole === null) throw {errno: "300409", errmsg: "角色已存在"}
     const newRole = new Role(userData)
     await newRole.save()
     return { role: newRole }
@@ -31,6 +29,7 @@ exports.create = async(userData) => {
 exports.update = async(paramsId,formData) => {
   try{
     const role = await Role.findById(paramsId)
+    if(role === null) throw {errno: "300404", errmsg: "角色不存在"}
       // 将请求数据合并到数据对象中
     Object.assign(role, formData)
     await role.save()
@@ -44,9 +43,7 @@ exports.update = async(paramsId,formData) => {
 exports.delete = async(paramsId) => {
   try{
     const role = await Role.findById(paramsId)
-    if(role === null) {
-      return { errorMessage: 'RoleNotFound' }
-    }
+    if(role === null) throw {errno: "300404", errmsg: "角色不存在"}
     await Role.findByIdAndDelete(paramsId)
   } catch(error){
     throw error
@@ -57,9 +54,7 @@ exports.delete = async(paramsId) => {
 exports.one = async(paramsId) => {
   try{
     const role = await Role.findById(paramsId).populate('menus').populate('resources')
-    if(role === null) {
-      return { statusCode: 404, errorMessage: 'RoleNotFound' }
-    }
+    if(role === null) throw {errno: "300404", errmsg: "角色不存在"}
     return role
   } catch(error){
     throw error
@@ -70,9 +65,7 @@ exports.one = async(paramsId) => {
 exports.permissionAssignment = async (paramsId, formData) => {
   try {
     const roles = await Role.findById(paramsId)
-    if (roles === null) {
-      return { statusCode: 404, errorMessage: 'RoleNotFound' }
-    }
+    if(role === null) throw {errno: "300404", errmsg: "角色不存在"}
     // 更新菜单和按钮
     roles.menus = formData.menus
     roles.resources = formData.resources

@@ -7,7 +7,7 @@ exports.list = async(req,res,next) => {
   try{
     let result = await menuSvc.list()
     const menus = buildTree(result)
-    res.status(200).json(formatResponse(200,"获取成功",menus))
+    res.status(200).json(formatResponse(0,"获取成功",menus))
   } catch (error){
     next(error)
   }
@@ -16,13 +16,8 @@ exports.list = async(req,res,next) => {
 // 创建菜单
 exports.create = async(req,res,next) => {
   try{
-    const result = await menuSvc.create(req.body)
-    if(result){
-      if(result.errorMessage === 'UserAlreadyExists'){
-        return res.status(404).json(formatResponse(404,'菜单已存在'))
-      }
-    }
-    res.status(200).json(formatResponse(200,"创建成功"))
+    await menuSvc.create(req.body)
+    res.status(200).json(formatResponse(0,"创建成功"))
   } catch (error){
     next(error)
   }
@@ -32,7 +27,7 @@ exports.create = async(req,res,next) => {
 exports.update = async(req,res,next) => {
   try{
     const result = await menuSvc.update(req.params.id,req.body)
-    res.status(200).json(formatResponse(200,"更新成功",result))
+    res.status(200).json(formatResponse(0,"更新成功",result))
   } catch (error){
     next(error)
   }
@@ -41,13 +36,8 @@ exports.update = async(req,res,next) => {
 // 删除菜单
 exports.delete = async(req,res,next) => {
   try{
-    const result = await menuSvc.delete(req.params.id)
-    if(result){
-      if(result.errorMessage === 'UserNotFound'){
-        return res.status(404).json(formatResponse(404,'用户不存在'))
-      }
-    }
-    res.status(200).json(formatResponse(200,'删除成功'))
+    await menuSvc.delete(req.params.id)
+    res.status(200).json(formatResponse(0,'删除成功'))
   } catch (error){
     next(error)
   }
@@ -57,12 +47,7 @@ exports.delete = async(req,res,next) => {
 exports.one = async (req,res,next) => {
   try{
     const result = await menuSvc.one(req.params.id)
-    if(result){
-      if(result.errorMessage === 'UserNotFound'){
-        return res.status(404).json(formatResponse(404,'用户不存在'))
-      }
-    }
-    res.status(200).json(formatResponse(200,'获取成功',result))
+    res.status(200).json(formatResponse(0,'获取成功',result))
   } catch (error){
     next(error)
   }

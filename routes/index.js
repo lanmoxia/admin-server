@@ -26,7 +26,7 @@ Router
 
 // 其他接口
 Router
-  .get('/refresh',commonCtrl.refreshToken)
+  .post('/refresh',commonCtrl.refreshToken)
   .get('/permissions', commonCtrl.permissionList) 
   .get('/users/search', commonCtrl.search)
   .post('/users/upload',upload.single('file'),commonCtrl.uploadFile)

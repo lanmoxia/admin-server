@@ -7,7 +7,7 @@ exports.list = async(req,res,next) => {
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
     const {users, totalItems, curPage, pageSize} = await mobileUserSvc.list(page,limit)
-    res.status(200).json(formatResponse(200,"获取成功",{
+    res.status(200).json(formatResponse(0,"获取成功",{
       users,
       page_info: {
         cur_page: curPage.toString(),
@@ -40,7 +40,7 @@ exports.list = async(req,res,next) => {
 exports.update = async(req,res,next) => {
   try{
     const result = await mobileUserSvc.update(req.params.id,req.body)
-    res.status(200).json(formatResponse(200,"更新成功",result))
+    res.status(200).json(formatResponse(0,"更新成功",result))
   } catch(error){
     next(error) 
   }
@@ -50,12 +50,7 @@ exports.update = async(req,res,next) => {
 exports.delete = async(req,res,next) => {
   try{
     const result = await mobileUserSvc.delete(req.params.id)
-    if(result){
-      if(result.errorMessage === 'UserNotFound'){
-        return res.status(404).json(formatResponse(404,'用户不存在'))
-      }
-    }
-    res.status(200).json(formatResponse(200,'删除成功'))
+    res.status(200).json(formatResponse(0,'删除成功'))
   } catch(error){
     next(error) 
   }
@@ -65,12 +60,7 @@ exports.delete = async(req,res,next) => {
 exports.one = async (req,res,next) => {
   try{
     const result = await mobileUserSvc.one(req.params.id)
-    if(result){
-      if(result.errorMessage === 'UserNotFound'){
-        return res.status(404).json(formatResponse(404,'用户不存在'))
-      }
-    }
-    res.status(200).json(formatResponse(200,'获取成功',result))
+    res.status(200).json(formatResponse(0,'获取成功',result))
   } catch(error){
     next(error) 
   }
@@ -80,12 +70,7 @@ exports.one = async (req,res,next) => {
 exports.updateRoles = async (req,res,next) => {
   try{
     const result = await mobileUserSvc.updateRoles(req.params.id,req.body.roles)
-    if(result){
-      if(result.errorMessage === 'UserNotFound'){
-        return res.status(404).json(formatResponse(404,'用户不存在'))
-      }
-    }
-    res.status(200).json(formatResponse(200,'设置成功',result))
+    res.status(200).json(formatResponse(0,'设置成功',result))
   } catch(error){
     throw error
   }

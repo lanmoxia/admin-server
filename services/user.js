@@ -19,9 +19,7 @@ exports.list = async(page,limit) => {
 exports.create = async(userData) => {
   try {
     const existingUser = await User.findOne({ username: userData.username })
-    if (existingUser) {
-      return {statusCode: 20001, errorMessage: 'UserAlreadyExists'}
-    }
+    if (existingUser) throw {errno: "200409", errmsg: "用户已存在"}
     const newUser = new User(userData)
     await newUser.save()
     return { user: newUser }
@@ -34,6 +32,7 @@ exports.create = async(userData) => {
 exports.update = async(paramsId,formData) => {
   try{
     const user = await User.findById(paramsId)
+    if(user === null) throw {errno: "200404", errmsg: "用户不存在"}
       // 将请求数据合并到数据对象中
     Object.assign(user, formData)
     await user.save()
@@ -47,9 +46,8 @@ exports.update = async(paramsId,formData) => {
 exports.delete = async(paramsId) => {
   try{
     const user = await User.findById(paramsId)
-    if(user === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if(user === null) throw {errno: "200404", errmsg: "用户不存在"}
+
     await User.findByIdAndDelete(paramsId)
   } catch(error){
     throw error
@@ -60,9 +58,7 @@ exports.delete = async(paramsId) => {
 exports.one = async(paramsId) => {
   try{
     const user = await User.findById(paramsId).populate('roles')
-    if(user === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if(user === null) throw {errno: "200404", errmsg: "用户不存在"}
     return {user}
   } catch(error){
     throw error
@@ -92,6 +88,7 @@ exports.userPermissions = async(user) => {
       // 如果 user 中包含 mobile，表示是手机登录
       userWithRoles = await MobileUser.findById(user._id).populate(populateObj)
     }
+    if(userWithRoles === null) throw {errno: "200404", errmsg: "用户不存在"}
     return userWithRoles
   } catch (error) {
     throw error
@@ -102,9 +99,7 @@ exports.userPermissions = async(user) => {
 exports.updateRoles = async(paramsId,formData) => {
   try{
     const user = await User.findById(paramsId)
-    if(user === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if(user === null) throw {errno: "200404", errmsg: "用户不存在"}
     user.roles = formData
     await user.save()
     return {user}
@@ -118,35 +113,79 @@ exports.batchCreate = async (filePath) => {
   try {
     const roleMapping = await getRoleMapping();
     const usersData = parseExcelFile(filePath);
-    const userCount = await User.countDocuments();
 
     // 加密密码并转换用户数据
-    const transformedUsersData = await Promise.all(usersData.map(async (user, index) => {
+    const transformedUsersData = await Promise.all(usersData.map(async (user) => {
       const hashedPassword = await bcrypt.hash(user['密码'], 10);
-      const avatarUrl = userCount === 0 && index === 0 ? 'http://localhost:3000/avatars/admin.png' : 'http://localhost:3000/avatars/user.jpg';
+      const avatarUrl = 'http://localhost:3000/avatars/user.jpg';
       return {
         username: user['用户名'],
         password: hashedPassword,
         avatar: avatarUrl,
         roles: user['角色'] ? [roleMapping[user['角色']]] : [],
-        status: user['状态'] !== undefined ? user['状态'] : undefined
+        status: user['状态'] !== undefined ? user['状态'] : 'active'
       };
     }));
 
     let successCount = 0;
     let failureCount = 0;
 
-    // 使用循环而不是insertMany来逐个插入文档
+    // 使用循环而不是insertMany来逐个检查并插入文档
     for (const user of transformedUsersData) {
       try {
-        await new User(user).save();
-        successCount++;
+        // 检查用户名是否存在
+        const existingUser = await User.findOne({ username: user.username }).exec();
+        if (!existingUser) {
+          await new User(user).save();
+          successCount++;
+        } else {
+          failureCount++;
+        }
       } catch (error) {
         failureCount++;
+        // 如果需要，可以添加额外的错误处理逻辑
       }
     }
     return { successCount, failureCount };
   } catch (error) {
-    throw error
+    throw error;
   }
 }
+
+// // 批量创建用户
+// exports.batchCreate = async (filePath) => {
+//   try {
+//     const roleMapping = await getRoleMapping();
+//     const usersData = parseExcelFile(filePath);
+//     const userCount = await User.countDocuments();
+
+//     // 加密密码并转换用户数据
+//     const transformedUsersData = await Promise.all(usersData.map(async (user, index) => {
+//       const hashedPassword = await bcrypt.hash(user['密码'], 10);
+//       const avatarUrl = userCount === 0 && index === 0 ? 'http://localhost:3000/avatars/admin.png' : 'http://localhost:3000/avatars/user.jpg';
+//       return {
+//         username: user['用户名'],
+//         password: hashedPassword,
+//         avatar: avatarUrl,
+//         roles: user['角色'] ? [roleMapping[user['角色']]] : [],
+//         status: user['状态'] !== undefined ? user['状态'] : undefined
+//       }
+//     }))
+
+//     let successCount = 0
+//     let failureCount = 0
+
+//     // 使用循环而不是insertMany来逐个插入文档
+//     for (const user of transformedUsersData) {
+//       try {
+//         await new User(user).save()
+//         successCount++
+//       } catch (error) {
+//         failureCount++
+//       }
+//     }
+//     return { successCount, failureCount };
+//   } catch (error) {
+//     throw error
+//   }
+// }

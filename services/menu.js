@@ -7,7 +7,7 @@ exports.list = async(page,limit) => {
     const menus = await Menu.find().lean()
     return menus
   } catch (error){
-    throw error
+    throw  error
   }
 },
 
@@ -15,9 +15,7 @@ exports.list = async(page,limit) => {
 exports.create = async(userData) => {
   try {
     const existingUser = await Menu.findOne({ name: userData.name })
-    if (existingUser) {
-     return {statusCode: 20001, errorMessage: 'UserAlreadyExists'}
-    }
+    if (existingUser) throw { errno: '500409', errmsg: '菜单已存在'}   
     const newMenu = new Menu(userData)
     await newMenu.save()
     return { menu: newMenu }
@@ -30,6 +28,7 @@ exports.create = async(userData) => {
 exports.update = async(paramsId,formData) => {
   try{
     const menu = await Menu.findById(paramsId)
+    if (menu === null) throw { errno: '500404', errmsg: '菜单不存在'}   
      // 将请求数据合并到数据对象中
     Object.assign(menu, formData)
     await menu.save()
@@ -43,9 +42,7 @@ exports.update = async(paramsId,formData) => {
 exports.delete = async(paramsId) => {
   try{
     const menu = await Menu.findById(paramsId)
-    if(menu === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if (menu === null) throw { errno: '500404', errmsg: '菜单不存在'}   
     await Menu.findByIdAndDelete(paramsId)
   } catch(error){
     throw error
@@ -56,9 +53,7 @@ exports.delete = async(paramsId) => {
 exports.one = async(paramsId) => {
   try{
     const menu = await Menu.findById(paramsId)
-    if(menu === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if (menu === null) throw { errno: '500404', errmsg: '菜单不存在'}   
     return {menu}
   } catch(error){
     throw error

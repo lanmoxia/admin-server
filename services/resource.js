@@ -14,9 +14,7 @@ exports.list = async() => {
 exports.create = async(resourceData) => {
   try {
     const existingResources = await Resource.findOne({ name: resourceData.name })
-    if (existingResources) {
-     return {statusCode: 20001, errorMessage: 'UserAlreadyExists'}
-    }
+    if(existingResources === null) throw {errno: "400409", errmsg: "按钮已存在"}
     const newResources = new Resource(resourceData)
     await newResources.save()
     return { resources: newResources }
@@ -29,6 +27,7 @@ exports.create = async(resourceData) => {
 exports.update = async(paramsId,formData) => {
   try{
     const resources = await Resource.findById(paramsId)
+    if(resources === null) throw {errno: "400404", errmsg: "按钮不存在"}
      // 将请求数据合并到数据对象中
     Object.assign(resources, formData)
     await resources.save()
@@ -42,9 +41,7 @@ exports.update = async(paramsId,formData) => {
 exports.delete = async(paramsId) => {
   try{
     const resources = await Resource.findById(paramsId)
-    if(resources === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if(resources === null) throw {errno: "400404", errmsg: "按钮不存在"}
     await Resource.findByIdAndDelete(paramsId)
   } catch(error){
     throw error
@@ -55,9 +52,7 @@ exports.delete = async(paramsId) => {
 exports.one = async(paramsId) => {
   try{
     const resources = await Resource.findById(paramsId)
-    if(resources === null) {
-      return { statusCode: 404, errorMessage: 'UserNotFound' }
-    }
+    if(resources === null) throw {errno: "400404", errmsg: "按钮不存在"}
     return {menu}
   } catch(error){
     throw error

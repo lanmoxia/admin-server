@@ -31,9 +31,7 @@ const {MobileUser} = require('../models')
   exports.update = async(paramsId,formData) => {
     try{
       const user = await MobileUser.findById(paramsId)
-      if(user === null) {
-        return { statusCode: 404, errorMessage: 'UserNotFound' }
-      }
+      if (user === null) throw { errno: '200409', errmsg: '用户不存在'}   
        // 将请求数据合并到数据对象中
       Object.assign(user, formData)
       await user.save()
@@ -47,9 +45,7 @@ const {MobileUser} = require('../models')
   exports.delete = async(paramsId) => {
     try{
       const user = await MobileUser.findById(paramsId)
-      if(user === null) {
-        return { statusCode: 404, errorMessage: 'UserNotFound' }
-      }
+      if (user === null) throw { errno: '200404', errmsg: '用户不存在'}   
       await MobileUser.findByIdAndDelete(paramsId)
     } catch(error){
       throw error
@@ -60,9 +56,7 @@ const {MobileUser} = require('../models')
   exports.one = async(paramsId) => {
     try{
       const user = await MobileUser.findById(paramsId)
-      if(user === null) {
-        return { statusCode: 404, errorMessage: 'UserNotFound' }
-      }
+      if (user === null) throw { errno: '200404', errmsg: '用户不存在'}   
       return {user}
     } catch(error){
       throw error
@@ -73,9 +67,7 @@ const {MobileUser} = require('../models')
   exports.updateRoles = async(paramsId,formData) => {
     try{
       const user = await MobileUser.findById(paramsId)
-      if(user === null) {
-        return { statusCode: 404, errorMessage: 'UserNotFound' }
-      }
+      if (user === null) throw { errno: '200404', errmsg: '用户不存在'}   
       user.roles = formData
       await user.save()
       return {user}

@@ -4,7 +4,6 @@ const decryptPassword = (encryptedPassword, privateKey) => {
   return new Promise((resolve, reject) => {
     try {
       const buffer = Buffer.from(encryptedPassword, 'base64');
-      console.log('D_psd',buffer)
       const decrypted = crypto.privateDecrypt(
         {
           key: privateKey,
@@ -15,7 +14,6 @@ const decryptPassword = (encryptedPassword, privateKey) => {
       );
       resolve(decrypted.toString('utf8'));
     } catch (error) {
-      console.log('D_error',error)
       reject(error);
     }
   });
