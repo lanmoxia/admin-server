@@ -57,6 +57,7 @@ exports.login = async(req,res,next) => {
     res.status(200).json(formatResponse(0, '登录成功', {
       info: {
         id: user._id,
+        name: user.name,
         username: user.username,
         status: user.status,
         avatar: user.avatar

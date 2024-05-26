@@ -23,6 +23,6 @@ module.exports = (req, res, next) => {
             return res.status(500).send({ message: '上传错误' });
         }
         // 如果没有错误，继续下一个中间件或路由处理器
-        next();
+        next()
     });
 };

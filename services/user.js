@@ -1,7 +1,10 @@
 const {User} = require('../models')
 const parseExcelFile = require('../utils/parseExcelFile')
 const { getRoleMapping } = require('../utils/roleUtils')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt')
+const dotenv = require('dotenv')
+dotenv.config()
+const baseUrl = process.env.BASE_URL
 
 // 获取用户列表
 exports.list = async(page,limit) => {
@@ -29,12 +32,19 @@ exports.create = async(userData) => {
 }
 
 // 更新用户
-exports.update = async(paramsId,formData) => {
+exports.update = async(paramsId,formData, filename) => {
   try{
     const user = await User.findById(paramsId)
     if(user === null) throw {errno: "200404", errmsg: "用户不存在"}
-      // 将请求数据合并到数据对象中
-    Object.assign(user, formData)
+    // 如果有文件上传，处理文件路径
+    const avatarURL = `${baseUrl}/avatars/${filename}`
+    user.avatar = avatarURL
+    // 手动从formData中提取其他字段并更新用户对象
+    for (const [key, value] of Object.entries(formData)) {
+      if (key !== 'avatar') { // 确保我们不重复处理文件字段
+        user[key] = value
+      }
+    }
     await user.save()
     return {user}
   } catch(error){

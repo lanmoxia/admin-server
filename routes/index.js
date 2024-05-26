@@ -2,7 +2,7 @@ const express = require('express')
 const Router = express.Router()
 
 const upload = require('../utils/multer')
-
+const imageUploader = require('../utils/upload')
 const userCtrl = require('../controllers/user')
 const mobileUserCtrl = require('../controllers/mobileUser')
 const roleCtrl = require('../controllers/role')
@@ -42,7 +42,7 @@ Router
   .post('/users_create', upload.single('file'),userCtrl.batchCreate)
   .get('/users/permission', userCtrl.userPermissions)
   .post('/users', userCtrl.create)
-  .put('/users/:id', userCtrl.update)
+  .put('/users/:id',imageUploader,userCtrl.update)
   .delete('/users/:id', userCtrl.delete)
   .get('/users/:id', userCtrl.one)
   .patch('/users/:id/roles',userCtrl.updateRoles) // 用户分配角色
