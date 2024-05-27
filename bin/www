@@ -27,7 +27,9 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+var host = '0.0.0.0'; // 监听所有网络接口
+server.listen(port, host)
+
 server.on('error', onError);
 server.on('listening', onListening);
 
@@ -89,4 +91,5 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  console.log(`Server running at http://${host}:${port}/`);
 }
