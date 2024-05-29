@@ -36,12 +36,15 @@ exports.update = async(paramsId,formData, filename) => {
     // 如果有文件上传，处理文件路径
     const avatarURL = `${process.env.BASE_URL}/avatars/${filename}`
     user.avatar = avatarURL
-    // 手动从formData中提取其他字段并更新用户对象
-    for (const [key, value] of Object.entries(formData)) {
-      if (key !== 'avatar') { // 确保我们不重复处理文件字段
-        user[key] = value
+     // 检查 formData 是否有其他需要更新的字段
+     if (formData && Object.keys(formData).length > 0) {
+      for (const [key, value] of Object.entries(formData)) {
+        if (key !== 'avatar') { // 确保我们不重复处理文件字段
+          user[key] = value
+        }
       }
     }
+    console.log(user)
     await user.save()
     return {user}
   } catch(error){

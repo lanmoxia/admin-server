@@ -58,10 +58,11 @@ exports.update = async(req,res,next) => {
   try{
     const id = req.params.id
     const formData = req.body
-    const filename = req.file.filename
+    const filename = req.file ? req.file.filename : null
     const result = await userSvc.update(id,formData,filename)
     res.status(200).json(formatResponse(0,"更新成功",result))
   } catch(error){
+    console.log('user_update_error',error)
     next(error) 
   }
 }

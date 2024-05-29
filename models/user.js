@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 const adminAvatarUrl = process.env.ADMIN_AVATAR_URL;
 const userAvatarUrl = process.env.USER_AVATAR_URL;
-
+console.log()
 // 用户模型定义
 const UserType = {
   /**
