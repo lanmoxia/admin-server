@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
-const adminAvatarUrl = 'http://localhost:3000/avatars/admin.png';
-const userAvatarUrl = 'http://localhost:3000/avatars/user.jpg';
+const adminAvatarUrl = process.env.ADMIN_AVATAR_URL;
+const userAvatarUrl = process.env.USER_AVATAR_URL;
 
 // 用户模型定义
 const UserType = {
